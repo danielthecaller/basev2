@@ -1,82 +1,80 @@
 "use client";
-import { useEffect } from "react";
-import Image from "next/image";
-import { Wallet } from "@coinbase/onchainkit/wallet";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
-// import { useQuickAuth } from "@coinbase/onchainkit/minikit";
+import { useState } from "react";
+import Header from "./components/Header";
 import styles from "./page.module.css";
 
-export default function Home() {
-  // If you need to verify the user's identity, you can use the useQuickAuth hook.
-  // This hook will verify the user's signature and return the user's FID. You can update
-  // this to meet your needs. See the /app/api/auth/route.ts file for more details.
-  // Note: If you don't need to verify the user's identity, you can get their FID and other user data
-  // via `useMiniKit().context?.user`.
-  // const { data, isLoading, error } = useQuickAuth<{
-  //   userFid: string;
-  // }>("/api/auth");
+type LobbyProps = {
+  onStartGame: (bet: number) => void;
+};
 
-  const { setMiniAppReady, isMiniAppReady } = useMiniKit();
-
-  useEffect(() => {
-    if (!isMiniAppReady) {
-      setMiniAppReady();
-    }
-  }, [setMiniAppReady, isMiniAppReady]);
+function Lobby({ onStartGame }: LobbyProps) {
+  const [betInput, setBetInput] = useState<number>(1);
 
   return (
-    <div className={styles.container}>
-      <header className={styles.headerWrapper}>
-        <Wallet />
-      </header>
-
-      <div className={styles.content}>
-        <Image
-          priority
-          src="/sphere.svg"
-          alt="Sphere"
-          width={200}
-          height={200}
+    <div>
+      <h2>Lobby</h2>
+      <label>
+        Bet (ETH):
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={betInput}
+          onChange={(e) => setBetInput(Number(e.target.value))}
         />
-        <h1 className={styles.title}>MiniKit</h1>
-
-        <p>
-          Get started by editing <code>app/page.tsx</code>
-        </p>
-
-        <h2 className={styles.componentsTitle}>Explore Components</h2>
-
-        <ul className={styles.components}>
-          {[
-            {
-              name: "Transaction",
-              url: "https://docs.base.org/onchainkit/transaction/transaction",
-            },
-            {
-              name: "Swap",
-              url: "https://docs.base.org/onchainkit/swap/swap",
-            },
-            {
-              name: "Checkout",
-              url: "https://docs.base.org/onchainkit/checkout/checkout",
-            },
-            {
-              name: "Wallet",
-              url: "https://docs.base.org/onchainkit/wallet/wallet",
-            },
-            {
-              name: "Identity",
-              url: "https://docs.base.org/onchainkit/identity/identity",
-            },
-          ].map((component) => (
-            <li key={component.name}>
-              <a target="_blank" rel="noreferrer" href={component.url}>
-                {component.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
+      </label>
+      <button onClick={() => onStartGame(betInput)}>Start Game</button>
     </div>
   );
 }
+
+type GameViewProps = {
+  bet: number;
+  onExit: () => void;
+};
+
+function GameView({ bet, onExit }: GameViewProps) {
+  return (
+    <div>
+      <h2>Game</h2>
+      <p>Bet: {bet} ETH</p>
+      <button onClick={onExit}>Exit to Lobby</button>
+    </div>
+  );
+}
+
+export default function Page() {
+  const [screen, setScreen] = useState<"lobby" | "game">("lobby");
+  const [betEth, setBetEth] = useState<number | null>(null);
+
+  function startGame(bet: number) {
+    setBetEth(bet);
+    setScreen("game");
+  }
+
+  function goToLobby() {
+    setScreen("lobby");
+    setBetEth(null);
+  }
+
+  return (
+    <div className={styles.container}>
+      <Header />
+
+      <main className={styles.main}>
+        {screen === "lobby" ? (
+          <Lobby onStartGame={startGame} />
+        ) : (
+          <GameView bet={betEth || 0} onExit={goToLobby} />
+        )}
+      </main>
+
+      <footer className={styles.footer}>
+        <small>
+          Two-player Sudoku betting (prototype) — winner receives 1.8x the bid.
+        </small>
+      </footer>
+    </div>
+  );
+}
+

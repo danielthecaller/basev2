@@ -29,7 +29,14 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the app by modifying `app/page.tsx` and the components in `app/components`.
+
+This repository now contains a prototype app called "Sudoku Duel" — a two-player UI for betting on identical Sudoku puzzles. It's an early front-end-only skeleton that includes:
+
+- Lobby UI: create / join game and pick an ETH bid
+- Game view: two identical Sudoku boards (masked), controls to start/reveal/decide a winner, and prize calculation (1.8x)
+
+Notes: This is a prototype UX — the on-chain flows, cryptographic verification, private puzzle distribution, and fair settlement are intentionally left out for now and will be implemented in follow-up iterations.
 
 
 ## Learn More
